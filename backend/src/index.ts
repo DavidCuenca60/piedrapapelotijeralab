@@ -101,7 +101,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    if (room.status === "full") {
+    if (room.status === "full" || room.players.length >= 2) {
       socket.emit("room:error", "La sala está llena");
       return;
     }
@@ -156,7 +156,7 @@ io.on("connection", (socket) => {
     if (!room) return;
 
     room.players.forEach((p) => (p.choice = null));
-    room.status = "waiting";
+    room.status = room.players.length === 2 ? "full" : "waiting";
     io.to(roomId).emit("game:restarted");
     broadcastRooms();
   });
