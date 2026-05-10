@@ -20,7 +20,6 @@ export default function Landing({ onJoin }: Props) {
   useEffect(() => { roomIdRef.current = roomId; }, [roomId]);
 
   useEffect(() => {
-    
     socket.emit("rooms:get");
 
     socket.on("rooms:update", (updatedRooms: RoomInfo[]) => {
@@ -55,7 +54,7 @@ export default function Landing({ onJoin }: Props) {
 
   const handleCreate = () => {
     if (!roomId.trim() || !alias.trim()) {
-      setError("Ingresa un nombre de sala y un alias");
+      setError("Enter your alias name and create a room");
       return;
     }
     setError("");
@@ -73,69 +72,64 @@ export default function Landing({ onJoin }: Props) {
     socket.emit("room:join", { roomId: id, alias: alias.trim() });
   };
 
-  const handleDelete = (id: string) => {
-    socket.emit("room:delete", id);
-  };
-
   return (
-    <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <h1 style={{ textAlign: "center" }}>Rock Paper Scissors</h1>
+    <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px" }}>
+      <h1>Rock Paper Scissors</h1>
+
+      <hr />
 
       <div style={{ marginBottom: 24 }}>
-        <h2>Create or join a room.</h2>
+        <h2>Create or join a room</h2>
+
+        <br />
 
         <input
           placeholder="Your Alias"
           value={alias}
           onChange={(e) => setAlias(e.target.value)}
-          style={inputStyle}
+          style={{ display: "block", width: "100%", marginBottom: 8, padding: 6, fontSize: 16 }}
         />
 
         <input
           placeholder="Name of the Room"
           value={roomId}
           onChange={(e) => setRoomId(e.target.value)}
-          style={inputStyle}
+          style={{ display: "block", width: "100%", marginBottom: 8, padding: 6, fontSize: 16 }}
         />
 
-        <button onClick={handleCreate} style={buttonStyle}>
+        <button onClick={handleCreate} style={{ padding: "6px 16px", fontSize: 16 }}>
           Create Room
         </button>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p style={{ color: "red", marginTop: 8 }}>{error}</p>}
       </div>
+
+      <hr />
 
       <div>
         <h2>Available Rooms</h2>
+        <br />
         {rooms.length === 0 ? (
-          <p style={{ color: "#888" }}>There are not available rooms</p>
+          <p>There are no available rooms</p>
         ) : (
           rooms.map((room) => (
-            <div key={room.id} style={roomCardStyle}>
+            <div key={room.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, padding: "8px 0", borderBottom: "1px solid #ccc" }}>
               <div>
                 <strong>{room.id}</strong>
-                <span style={{ marginLeft: 8, color: room.status === "waiting" ? "green" : "red" }}>
-                  {room.status === "waiting" ? "Waiting players" : "Full"}
+                {" — "}
+                <span style={{ color: room.status === "waiting" ? "green" : "red" }}>
+                  {room.status === "waiting" ? "Waiting" : "Full"}
                 </span>
-                <span style={{ marginLeft: 8, color: "#888" }}>
-                  ({room.players}/2 jugadores)
-                </span>
+                {" "}
+                <span style={{ color: "#888" }}>({room.players}/2 players)</span>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  onClick={() => handleJoin(room.id)}
-                  disabled={room.status === "full"}
-                  style={{
-                    ...smallButtonStyle,
-                    backgroundColor: "#4f46e5",
-                    opacity: room.status === "full" ? 0.5 : 1,
-                    cursor: room.status === "full" ? "not-allowed" : "pointer",
-                  }}
-                >
-                  Join
-                </button>
-                
-              </div>
+              <button
+                onClick={() => handleJoin(room.id)}
+                disabled={room.status === "full"}
+                style={{ padding: "4px 12px", fontSize: 14 }}
+              >
+                Join
+              </button>
             </div>
           ))
         )}
@@ -143,46 +137,3 @@ export default function Landing({ onJoin }: Props) {
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  display: "block",
-  width: "100%",
-  padding: "10px",
-  marginBottom: 10,
-  fontSize: 16,
-  borderRadius: 8,
-  border: "1px solid #ccc",
-  boxSizing: "border-box",
-};
-
-const buttonStyle: React.CSSProperties = {
-  display: "block",
-  width: "100%",
-  padding: "10px",
-  marginTop: 8,
-  fontSize: 16,
-  borderRadius: 8,
-  border: "none",
-  backgroundColor: "#4f46e5",
-  color: "white",
-  cursor: "pointer",
-};
-
-const smallButtonStyle: React.CSSProperties = {
-  padding: "8px 16px",
-  fontSize: 14,
-  borderRadius: 8,
-  border: "none",
-  color: "white",
-};
-
-const roomCardStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "12px",
-  marginBottom: 10,
-  borderRadius: 8,
-  border: "1px solid #ddd",
-  backgroundColor: "#f9f9f9",
-};

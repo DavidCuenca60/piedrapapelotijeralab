@@ -50,33 +50,31 @@ export default function Result({ result, roomId, alias, onRestart, onLeave }: Pr
   const isTie = result.winner === "tie";
 
   return (
-    <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif", textAlign: "center" }}>
+    <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px", textAlign: "center" }}>
       <h1>Results</h1>
 
+      <hr />
+
       {!revealed ? (
-        <div style={countdownStyle}>
-          <p style={{ fontSize: 20, color: "#888" }}>Results in...</p>
-          <span style={{ fontSize: 80, fontWeight: "bold", color: "#4f46e5" }}>
-            {countdown}
-          </span>
+        <div style={{ margin: "40px 0" }}>
+          <p>Revealing in...</p>
+          <p style={{ fontSize: 80 }}>{countdown}</p>
         </div>
       ) : (
         <>
-          <div style={resultCardStyle}>
+          <div style={{ display: "flex", justifyContent: "space-around", margin: "24px 0" }}>
             {result.players.map((p) => (
-              <div key={p.alias} style={playerResultStyle}>
-                <p style={{ fontSize: 18, fontWeight: "bold" }}>
-                  {p.alias === alias ? `${p.alias} (tú)` : p.alias}
-                </p>
-                <span style={{ fontSize: 60 }}>
-                  {emojiMap[p.choice!]}
-                </span>
-                <p style={{ color: "#888" }}>{p.choice}</p>
+              <div key={p.alias}>
+                <p><strong>{p.alias === alias ? `${p.alias} (You)` : p.alias}</strong></p>
+                <p style={{ fontSize: 60 }}>{emojiMap[p.choice!]}</p>
+                <p>{p.choice}</p>
               </div>
             ))}
           </div>
 
-          <div style={winnerBannerStyle(isTie, isWinner)}>
+          <hr />
+
+          <div style={{ margin: "16px 0" }}>
             {isTie ? (
               <p style={{ fontSize: 24 }}>It's a Tie!</p>
             ) : isWinner ? (
@@ -85,18 +83,18 @@ export default function Result({ result, roomId, alias, onRestart, onLeave }: Pr
               <p style={{ fontSize: 24 }}>You Lost</p>
             )}
             {!isTie && (
-              <p style={{ color: "#555" }}>
-                Ganador: <strong>{result.winner}</strong>
-              </p>
+              <p>Winner: <strong>{result.winner}</strong></p>
             )}
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-            <button onClick={handleRestart} style={restartButtonStyle}>
-                Play Again
+          <hr />
+
+          <div style={{ display: "flex", gap: 12, marginTop: 16, justifyContent: "center" }}>
+            <button onClick={handleRestart} style={{ padding: "6px 16px", fontSize: 16 }}>
+              Play Again
             </button>
-            <button onClick={handleLeave} style={leaveButtonStyle}>
-                Get Back
+            <button onClick={handleLeave} style={{ padding: "6px 16px", fontSize: 16 }}>
+              Back to Lobby
             </button>
           </div>
         </>
@@ -104,56 +102,3 @@ export default function Result({ result, roomId, alias, onRestart, onLeave }: Pr
     </div>
   );
 }
-
-const countdownStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  height: 200,
-};
-
-const resultCardStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-around",
-  padding: 20,
-  backgroundColor: "#f3f4f6",
-  borderRadius: 12,
-  marginBottom: 20,
-};
-
-const playerResultStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: 4,
-};
-
-const winnerBannerStyle = (isTie: boolean, isWinner: boolean): React.CSSProperties => ({
-  padding: 16,
-  borderRadius: 12,
-  backgroundColor: isTie ? "#fef9c3" : isWinner ? "#dcfce7" : "#fee2e2",
-  border: `2px solid ${isTie ? "#fde047" : isWinner ? "#5eb47d" : "#fca5a5"}`,
-});
-
-const restartButtonStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "12px",
-  fontSize: 16,
-  borderRadius: 8,
-  border: "none",
-  backgroundColor: "#4f46e5",
-  color: "white",
-  cursor: "pointer",
-};
-
-const leaveButtonStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "12px",
-  fontSize: 16,
-  borderRadius: 8,
-  border: "none",
-  backgroundColor: "#ef4444",
-  color: "white",
-  cursor: "pointer",
-};

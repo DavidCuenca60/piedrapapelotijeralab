@@ -12,14 +12,14 @@ interface Props {
 const choices: { value: Choice; emoji: string; label: string }[] = [
   { value: "rock", emoji: "🪨", label: "Rock" },
   { value: "paper", emoji: "📄", label: "Paper" },
-  { value: "scissors", emoji: "✂️", label: "Sissors" },
+  { value: "scissors", emoji: "✂️", label: "Scissors" },
 ];
 
 export default function Game({ roomId, alias, onResult, onLeave }: Props) {
   const socket = useSocket();
   const [players, setPlayers] = useState<PlayerInfo[]>([{ alias }]);
   const [selected, setSelected] = useState<Choice | null>(null);
-  const [status, setStatus] = useState("Waiting for the oponent...");
+  const [status, setStatus] = useState("Waiting for the opponent...");
   const [readyPlayers, setReadyPlayers] = useState<string[]>([]);
   const onResultRef = useRef(onResult);
 
@@ -31,15 +31,15 @@ export default function Game({ roomId, alias, onResult, onLeave }: Props) {
     socket.on("room:joined", ({ players: p }: { players: PlayerInfo[]; status: string }) => {
       setPlayers(p);
       if (p.length === 2) {
-        setStatus("Both players are Ready!.");
+        setStatus("Both players are ready!");
       } else {
-        setStatus("Waiting for the oponent...");
+        setStatus("Waiting for the opponent...");
       }
     });
 
     socket.on("room:playerLeft", ({ alias: leftAlias }: { alias: string }) => {
       setPlayers((prev) => prev.filter((p) => p.alias !== leftAlias));
-      setStatus(`❌ ${leftAlias} left the Room`);
+      setStatus(`${leftAlias} left the room`);
     });
 
     socket.on("game:playerReady", ({ alias: readyAlias }: { alias: string }) => {
@@ -48,9 +48,9 @@ export default function Game({ roomId, alias, onResult, onLeave }: Props) {
         return [...prev, readyAlias];
       });
       if (readyAlias === alias) {
-        setStatus("Waiting for the oponent to choose...");
+        setStatus("Waiting for the opponent to choose...");
       } else {
-        setStatus("The oponent already chose. Hurry up!");
+        setStatus("The opponent already chose. Hurry up!");
       }
     });
 
@@ -61,7 +61,7 @@ export default function Game({ roomId, alias, onResult, onLeave }: Props) {
     socket.on("game:restarted", () => {
       setSelected(null);
       setReadyPlayers([]);
-      setStatus("¡Nueva ronda! Elige tu opción.");
+      setStatus("New round! Choose your option.");
     });
 
     socket.on("room:deleted", () => {
@@ -90,97 +90,60 @@ export default function Game({ roomId, alias, onResult, onLeave }: Props) {
   };
 
   return (
-    <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <h1 style={{ textAlign: "center" }}>Rock Paper Scissors</h1>
+    <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px" }}>
+      <h1>Rock Paper Scissors</h1>
 
-      <div style={cardStyle}>
-        <p>Room: <strong>{roomId}</strong></p>
-        <p>You: <strong>{alias}</strong></p>
-        <p style={{ color: "#4f46e5" }}>{status}</p>
-      </div>
+      <hr />
 
-      <div style={{ marginBottom: 16 }}>
-        <h3>Players in the room:</h3>
+      <p>Room: <strong>{roomId}</strong></p>
+      <p>You: <strong>{alias}</strong></p>
+      <p><em>{status}</em></p>
+
+      <hr />
+
+      <h3>Players in the room:</h3>
+      <ul>
         {players.map((p) => (
-          <div key={p.alias} style={playerRowStyle}>
-            <span>{p.alias === alias ? `${p.alias} (You)` : p.alias}</span>
-            <span>
-              {readyPlayers.includes(p.alias) ? "Ready" : "Choosing..."}
-            </span>
-          </div>
+          <li key={p.alias}>
+            {p.alias === alias ? `${p.alias} (You)` : p.alias}
+            {" — "}
+            {readyPlayers.includes(p.alias) ? "Ready" : "Choosing..."}
+          </li>
         ))}
-      </div>
+      </ul>
+
+      <br />
 
       <h3>Choose your option:</h3>
-      <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", gap: 16, margin: "12px 0" }}>
         {choices.map((c) => (
           <button
             key={c.value}
             onClick={() => handleChoice(c.value)}
             disabled={!!selected || players.length < 2}
             style={{
-              ...choiceButtonStyle,
-              backgroundColor: selected === c.value ? "#4f46e5" : "#f3f4f6",
-              color: selected === c.value ? "white" : "black",
-              opacity: (selected && selected !== c.value) || players.length < 2 ? 0.4 : 1,
+              padding: "10px 16px",
+              fontSize: 14,
               cursor: selected || players.length < 2 ? "not-allowed" : "pointer",
+              fontWeight: selected === c.value ? "bold" : "normal",
+              outline: selected === c.value ? "2px solid black" : "none",
             }}
           >
-            <span style={{ fontSize: 40 }}>{c.emoji}</span>
-            <span style={{ fontSize: 14 }}>{c.label}</span>
+            <div style={{ fontSize: 36 }}>{c.emoji}</div>
+            {c.label}
           </button>
         ))}
       </div>
 
       {players.length < 2 && (
-        <p style={{ textAlign: "center", color: "#888", marginBottom: 16 }}>
-            Waiting for another player to join to play
-        </p>
+        <p><em>Waiting for another player to join to play</em></p>
       )}
 
-      <button onClick={handleLeave} style={leaveButtonStyle}>
+      <br />
+
+      <button onClick={handleLeave} style={{ padding: "6px 16px", fontSize: 16 }}>
         Leave Room
       </button>
     </div>
   );
 }
-
-const cardStyle: React.CSSProperties = {
-  backgroundColor: "#f3f4f6",
-  borderRadius: 8,
-  padding: 16,
-  marginBottom: 20,
-};
-
-const playerRowStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  padding: "8px 12px",
-  marginBottom: 8,
-  borderRadius: 8,
-  border: "1px solid #ddd",
-  backgroundColor: "#f9f9f9",
-};
-
-const choiceButtonStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  padding: "16px 20px",
-  borderRadius: 12,
-  border: "2px solid #ddd",
-  fontSize: 16,
-  transition: "all 0.2s",
-};
-
-const leaveButtonStyle: React.CSSProperties = {
-  display: "block",
-  width: "100%",
-  padding: "10px",
-  fontSize: 16,
-  borderRadius: 8,
-  border: "none",
-  backgroundColor: "#ef4444",
-  color: "white",
-  cursor: "pointer",
-};
