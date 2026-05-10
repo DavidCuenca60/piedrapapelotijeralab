@@ -10,37 +10,36 @@ interface Props {
 }
 
 const choices: { value: Choice; emoji: string; label: string }[] = [
-  { value: "rock", emoji: "🪨", label: "Piedra" },
-  { value: "paper", emoji: "📄", label: "Papel" },
-  { value: "scissors", emoji: "✂️", label: "Tijera" },
+  { value: "rock", emoji: "🪨", label: "Rock" },
+  { value: "paper", emoji: "📄", label: "Paper" },
+  { value: "scissors", emoji: "✂️", label: "Sissors" },
 ];
 
 export default function Game({ roomId, alias, onResult, onLeave }: Props) {
   const socket = useSocket();
   const [players, setPlayers] = useState<PlayerInfo[]>([{ alias }]);
   const [selected, setSelected] = useState<Choice | null>(null);
-  const [status, setStatus] = useState("Esperando al oponente...");
+  const [status, setStatus] = useState("Waiting for the oponent...");
   const [readyPlayers, setReadyPlayers] = useState<string[]>([]);
   const onResultRef = useRef(onResult);
 
   useEffect(() => { onResultRef.current = onResult; }, [onResult]);
 
   useEffect(() => {
-    
     socket.emit("room:join", { roomId, alias });
 
     socket.on("room:joined", ({ players: p }: { players: PlayerInfo[]; status: string }) => {
       setPlayers(p);
       if (p.length === 2) {
-        setStatus("¡Ambos jugadores listos! Elige tu opción.");
+        setStatus("Both players are Ready!.");
       } else {
-        setStatus("Esperando al oponente...");
+        setStatus("Waiting for the oponent...");
       }
     });
 
     socket.on("room:playerLeft", ({ alias: leftAlias }: { alias: string }) => {
       setPlayers((prev) => prev.filter((p) => p.alias !== leftAlias));
-      setStatus(`❌ ${leftAlias} se desconectó`);
+      setStatus(`❌ ${leftAlias} left the Room`);
     });
 
     socket.on("game:playerReady", ({ alias: readyAlias }: { alias: string }) => {
@@ -49,9 +48,9 @@ export default function Game({ roomId, alias, onResult, onLeave }: Props) {
         return [...prev, readyAlias];
       });
       if (readyAlias === alias) {
-        setStatus("✅ Esperando que el oponente elija...");
+        setStatus("Waiting for the oponent to choose...");
       } else {
-        setStatus("✅ El oponente ya eligió. ¡Date prisa!");
+        setStatus("The oponent already chose. Hurry up!");
       }
     });
 
@@ -79,6 +78,11 @@ export default function Game({ roomId, alias, onResult, onLeave }: Props) {
     };
   }, [socket, roomId, alias, onLeave]);
 
+  const handleLeave = () => {
+    socket.emit("room:leave", roomId);
+    onLeave();
+  };
+
   const handleChoice = (choice: Choice) => {
     if (selected) return;
     setSelected(choice);
@@ -87,27 +91,27 @@ export default function Game({ roomId, alias, onResult, onLeave }: Props) {
 
   return (
     <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <h1 style={{ textAlign: "center" }}>🪨📄✂ Rock Paper Scissors</h1>
+      <h1 style={{ textAlign: "center" }}>Rock Paper Scissors</h1>
 
       <div style={cardStyle}>
-        <p>🏠 Sala: <strong>{roomId}</strong></p>
-        <p>👤 Tú: <strong>{alias}</strong></p>
+        <p>Room: <strong>{roomId}</strong></p>
+        <p>You: <strong>{alias}</strong></p>
         <p style={{ color: "#4f46e5" }}>{status}</p>
       </div>
 
       <div style={{ marginBottom: 16 }}>
-        <h3>Jugadores en la sala:</h3>
+        <h3>Players in the room:</h3>
         {players.map((p) => (
           <div key={p.alias} style={playerRowStyle}>
-            <span>{p.alias === alias ? `${p.alias} (tú)` : p.alias}</span>
+            <span>{p.alias === alias ? `${p.alias} (You)` : p.alias}</span>
             <span>
-              {readyPlayers.includes(p.alias) ? "✅ Listo" : "⏳ Eligiendo..."}
+              {readyPlayers.includes(p.alias) ? "Ready" : "Choosing..."}
             </span>
           </div>
         ))}
       </div>
 
-      <h3>Elige tu opción:</h3>
+      <h3>Choose your option:</h3>
       <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
         {choices.map((c) => (
           <button
@@ -130,12 +134,12 @@ export default function Game({ roomId, alias, onResult, onLeave }: Props) {
 
       {players.length < 2 && (
         <p style={{ textAlign: "center", color: "#888", marginBottom: 16 }}>
-          ⏳ Espera a que otro jugador se una para poder jugar
+            Waiting for another player to join to play
         </p>
       )}
 
-      <button onClick={onLeave} style={leaveButtonStyle}>
-        Salir de la sala
+      <button onClick={handleLeave} style={leaveButtonStyle}>
+        Leave Room
       </button>
     </div>
   );

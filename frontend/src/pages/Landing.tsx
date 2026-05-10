@@ -20,7 +20,7 @@ export default function Landing({ onJoin }: Props) {
   useEffect(() => { roomIdRef.current = roomId; }, [roomId]);
 
   useEffect(() => {
-    // Pedir salas al montar el componente
+    
     socket.emit("rooms:get");
 
     socket.on("rooms:update", (updatedRooms: RoomInfo[]) => {
@@ -64,7 +64,7 @@ export default function Landing({ onJoin }: Props) {
 
   const handleJoin = (id: string) => {
     if (!alias.trim()) {
-      setError("Ingresa tu alias primero");
+      setError("Enter your alias first");
       return;
     }
     setError("");
@@ -79,43 +79,43 @@ export default function Landing({ onJoin }: Props) {
 
   return (
     <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <h1 style={{ textAlign: "center" }}>🪨📄✂ Rock Paper Scissors</h1>
+      <h1 style={{ textAlign: "center" }}>Rock Paper Scissors</h1>
 
       <div style={{ marginBottom: 24 }}>
-        <h2>Crear o unirse a sala</h2>
+        <h2>Create or join a room.</h2>
 
         <input
-          placeholder="Tu alias"
+          placeholder="Your Alias"
           value={alias}
           onChange={(e) => setAlias(e.target.value)}
           style={inputStyle}
         />
 
         <input
-          placeholder="Nombre de la sala"
+          placeholder="Name of the Room"
           value={roomId}
           onChange={(e) => setRoomId(e.target.value)}
           style={inputStyle}
         />
 
         <button onClick={handleCreate} style={buttonStyle}>
-          Crear sala
+          Create Room
         </button>
 
         {error && <p style={{ color: "red" }}>{error}</p>}
       </div>
 
       <div>
-        <h2>Salas disponibles</h2>
+        <h2>Available Rooms</h2>
         {rooms.length === 0 ? (
-          <p style={{ color: "#888" }}>No hay salas disponibles</p>
+          <p style={{ color: "#888" }}>There are not available rooms</p>
         ) : (
           rooms.map((room) => (
             <div key={room.id} style={roomCardStyle}>
               <div>
                 <strong>{room.id}</strong>
                 <span style={{ marginLeft: 8, color: room.status === "waiting" ? "green" : "red" }}>
-                  {room.status === "waiting" ? "⏳ Esperando" : "🔒 Llena"}
+                  {room.status === "waiting" ? "Waiting players" : "Full"}
                 </span>
                 <span style={{ marginLeft: 8, color: "#888" }}>
                   ({room.players}/2 jugadores)
@@ -132,18 +132,9 @@ export default function Landing({ onJoin }: Props) {
                     cursor: room.status === "full" ? "not-allowed" : "pointer",
                   }}
                 >
-                  Unirse
+                  Join
                 </button>
-                <button
-                  onClick={() => handleDelete(room.id)}
-                  style={{
-                    ...smallButtonStyle,
-                    backgroundColor: "#ef4444",
-                    cursor: "pointer",
-                  }}
-                >
-                  🗑️
-                </button>
+                
               </div>
             </div>
           ))

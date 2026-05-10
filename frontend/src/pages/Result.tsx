@@ -41,16 +41,21 @@ export default function Result({ result, roomId, alias, onRestart, onLeave }: Pr
     onRestart();
   };
 
+  const handleLeave = () => {
+    socket.emit("room:leave", roomId);
+    onLeave();
+  };
+
   const isWinner = result.winner === alias;
   const isTie = result.winner === "tie";
 
   return (
     <div style={{ maxWidth: 500, margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif", textAlign: "center" }}>
-      <h1>🪨📄✂ Resultado</h1>
+      <h1>Results</h1>
 
       {!revealed ? (
         <div style={countdownStyle}>
-          <p style={{ fontSize: 20, color: "#888" }}>Revelando en...</p>
+          <p style={{ fontSize: 20, color: "#888" }}>Results in...</p>
           <span style={{ fontSize: 80, fontWeight: "bold", color: "#4f46e5" }}>
             {countdown}
           </span>
@@ -73,11 +78,11 @@ export default function Result({ result, roomId, alias, onRestart, onLeave }: Pr
 
           <div style={winnerBannerStyle(isTie, isWinner)}>
             {isTie ? (
-              <p style={{ fontSize: 24 }}>🤝 ¡Empate!</p>
+              <p style={{ fontSize: 24 }}>It's a Tie!</p>
             ) : isWinner ? (
-              <p style={{ fontSize: 24 }}>🎉 ¡Ganaste!</p>
+              <p style={{ fontSize: 24 }}>You Won!</p>
             ) : (
-              <p style={{ fontSize: 24 }}>😢 Perdiste</p>
+              <p style={{ fontSize: 24 }}>You Lost</p>
             )}
             {!isTie && (
               <p style={{ color: "#555" }}>
@@ -88,10 +93,10 @@ export default function Result({ result, roomId, alias, onRestart, onLeave }: Pr
 
           <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
             <button onClick={handleRestart} style={restartButtonStyle}>
-              🔄 Jugar de nuevo
+                Play Again
             </button>
-            <button onClick={onLeave} style={leaveButtonStyle}>
-              🏠 Volver al inicio
+            <button onClick={handleLeave} style={leaveButtonStyle}>
+                Get Back
             </button>
           </div>
         </>
@@ -128,7 +133,7 @@ const winnerBannerStyle = (isTie: boolean, isWinner: boolean): React.CSSProperti
   padding: 16,
   borderRadius: 12,
   backgroundColor: isTie ? "#fef9c3" : isWinner ? "#dcfce7" : "#fee2e2",
-  border: `2px solid ${isTie ? "#fde047" : isWinner ? "#86efac" : "#fca5a5"}`,
+  border: `2px solid ${isTie ? "#fde047" : isWinner ? "#5eb47d" : "#fca5a5"}`,
 });
 
 const restartButtonStyle: React.CSSProperties = {
