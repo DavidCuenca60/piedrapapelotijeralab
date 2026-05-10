@@ -58,7 +58,7 @@ function broadcastRooms() {
 
 
 io.on("connection", (socket) => {
-  console.log(`✅ Cliente conectado: ${socket.id}`);
+  console.log(`Cliente conectado: ${socket.id}`);
 
   broadcastRooms();
 
@@ -173,7 +173,7 @@ io.on("connection", (socket) => {
 
   
   socket.on("disconnect", () => {
-    console.log(`❌ Cliente desconectado: ${socket.id}`);
+    console.log(`Cliente desconectado: ${socket.id}`);
 
     for (const [roomId, room] of rooms.entries()) {
       const index = room.players.findIndex((p) => p.id === socket.id);
